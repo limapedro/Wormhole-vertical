@@ -14,8 +14,9 @@ and a corresponding [ARCHITECTURE_LOG.md](ARCHITECTURE_LOG.md) entry.
 | OS | Windows 10 Pro, build `26300.10075` |
 | GPU | NVIDIA GeForce GTX 1660 SUPER (6 GB) |
 | GPU driver | `32.0.16.2101` |
-| OBS runtime under test | Studio **33.0.0**, installed at `C:\Program Files\obs-studio` |
+| OBS runtime under test | Studio **33.0.3** portable (`.deps/obs-33.0.3`, verified `FileVersion=33.0.3`) |
 | Target stable OBS (per brief) | Studio **33.0.3**, released 2026-11-22 |
+| System install (not used for benchmarks) | Studio 33.0.0 at `C:\Program Files\obs-studio`; no admin rights to upgrade |
 | Toolchain | Visual Studio 18 Community / MSVC 19.51.36257.0, CMake 4.3.3 |
 | Test environment | disposable portable OBS under `obs-portable/`, driven by OBS-MCP |
 | Plugins under test | upstream `aitum-vertical` 1.6.8 (`baseline-upstream`) and Wormhole-vertical |

@@ -6,6 +6,27 @@ silently change course. Newest entries first.
 
 ---
 
+## 2026-11-25 — Benchmark runtime updated to OBS 33.0.3
+
+- **Decision:** all further measurements run on portable OBS 33.0.3, the latest
+  stable release. Earlier `exp_000` / first `exp_003` numbers were captured on
+  33.0.0 and are labelled as such; a confirmation matrix on 33.0.3 is required
+  before a result is final.
+- **Alternatives considered:** upgrading the system installation — rejected:
+  the session is not an administrator, and touching `C:\Program Files` would
+  risk the user's existing OBS. The portable ZIP from the official release was
+  extracted into `.deps/obs-33.0.3`; `bin`, `core` and `data` were mirrored into
+  `obs-portable/` while preserving `config/`, `obs-plugins/` and the no-op
+  module stubs.
+- **Evidence:** GitHub release asset
+  `OBS-Studio-33.0.3-Windows-x64.zip` (235,774,237 bytes);
+  `obs64.exe` FileVersion 33.0.3;
+  `scripts/verify_side_by_side.ps1` on the new runtime:
+  `loaded=2 collisions=0 wormhole_canvas=True aitum_canvas=True errors=0`.
+- **Consequences:** every result row records the runtime version. Parallel CI
+  still builds against the pinned 31.1.0 SDK; that is a build dependency, not
+  the target runtime.
+
 ## 2026-11-25 — Performance ceiling: under 1% total, 0.5% stretch
 
 - **Decision:** Wormhole-vertical must deliver identical functionality while the
