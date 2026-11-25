@@ -1,0 +1,57 @@
+name: Wormhole-vertical CI
+
+# Build-only CI for every PR. Upstream's signing/release workflows remain in
+# place for tagged releases; this one gives a fast, secret-free signal.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-build:
+    name: Build (Windows x64, required)
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake --preset windows-ci-x64
+      - name: Build
+        run: cmake --build --preset windows-ci-x64 --config RelWithDebInfo --parallel
+      - name: Upload DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: wormhole-vertical-windows-x64
+          path: build_x64/RelWithDebInfo/wormhole-vertical.dll
+
+  linux-build:
+    name: Build (Linux x86_64, best effort)
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build pkg-config curl zsh \
+            qt6-base-dev qt6-base-private-dev libcurl4-openssl-dev \
+            libjansson-dev libx11-dev libxcb-xinerama0-dev
+      - name: Configure
+        run: cmake --preset ubuntu-ci-x86_64
+      - name: Build
+        run: cmake --build --preset ubuntu-ci-x86_64
+
+  macos-build:
+    name: Build (macOS universal, best effort)
+    runs-on: macos-15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake --preset macos-ci
+      - name: Build
+        run: cmake --build --preset macos-ci --config RelWithDebInfo
