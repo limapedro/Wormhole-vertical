@@ -1,0 +1,16 @@
+{
+  "portable_dir": "obs-portable",
+  "mcp_exe": "E:/__PROJECTS__/OBS-MCP/build/obs-mcp.exe",
+  "mcp_config": "harness/config/obs-mcp.toml",
+  "plugin_store": "benchmarks/plugins",
+  "dismiss_script": "scripts/dismiss_crash.ps1",
+  "instance": { "name": "wormhole", "ws_host": "127.0.0.1", "ws_port": 4455 },
+  "warmup_s": 8,
+  "window_s": 30,
+  "runs": 5,
+  "samples": 6,
+  "settle_s": 6,
+  "scenarios": [
+    { "id": "S0-fork", "plugins": ["wormhole-vertical"], "description": "fork with deferred canvas video mix" }
+  ]
+}
