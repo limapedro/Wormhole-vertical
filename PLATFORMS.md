@@ -4,8 +4,10 @@
 
 See [PERFORMANCE_TARGETS.md](PERFORMANCE_TARGETS.md) for the full table.
 Summary: i5-12400F, GTX 1660 SUPER 6 GB, 32 GB RAM, Windows 10 Pro
-`26300.10075`, driver `32.0.16.2101`. Installed OBS is 33.0.0; target stable
-is 33.0.3. **All performance numbers come from this machine.**
+`26300.10075`, driver `32.0.16.2101`. The portable OBS used for all benchmarks
+was updated to **33.0.3** on 2026-11-25; the system install remains 33.0.0
+because the session has no administrator rights. **All performance numbers
+come from this machine.**
 
 ## Windows
 

@@ -39,7 +39,23 @@ Running log. Newest entries first. Updated on every merge and every experiment.
 - **Phase A7** — unmodified fork built with CMake + VS 18 generator override
   and loaded in portable OBS (`[Vertical Canvas] loaded version 1.6.8`);
   tagged `baseline-upstream`.
-- **Phase B** — planning docs being written; issues #1–#17 created.
+- **Phase B** — planning docs merged (PR #18); issues #1–#17 created.
+- **CI** — PR #21 added a secret-free Windows/Linux/macOS build matrix;
+  PR #25 switched Linux/macOS to the upstream build action. Running
+  `actions/runs/45619724868`: Windows **success**, Linux **success**, macOS
+  queued. Earlier Linux attempt failed with "Could not find LibObs" and was
+  fixed (recorded in RISKS.md R11).
+- **Harness** — typed `@dataclass` configs, OBS-MCP driver, incremental CSV
+  output and cross-run CoV analysis merged (PRs #22/#24). Three unit tests pass.
+  `exp_000` noise/baseline run in progress on this machine; partial results
+  already show OBS-only 0.6168% CPU, upstream 0.7904%, fork 0.7679% median
+  on the idle scenario with ~9% run-to-run CoV. These are partial numbers,
+  not a finding, until the full matrix and `FINDINGS.md` are complete.
+- **Experiments prepared** — `exp_001` hypothesis (per-frame vertex buffers),
+  `exp_002` hypothesis + implementation (per-item config lookups, branch
+  `exp/002-overflow-config-cache`), `exp_003` hypothesis + implementation
+  (defer canvas video mix, branch `exp/003-defer-canvas-video`). Neither is
+  merged; both await measured before/after data.
 
 ## Next
 

@@ -5253,7 +5253,7 @@ void CanvasDock::AddSourceFromAction()
 	}
 }
 
-bool CanvasDock::StartVideo()
+bool CanvasDock::EnsureCanvas()
 {
 	obs_canvas_t *c = nullptr;
 	obs_frontend_canvas_list cl = {};
@@ -5286,6 +5286,15 @@ bool CanvasDock::StartVideo()
 	auto s = obs_weak_source_get_source(source);
 	obs_canvas_set_channel(canvas, 0, s);
 	obs_source_release(s);
+
+	return true;
+}
+
+bool CanvasDock::StartVideo()
+{
+	if (!EnsureCanvas()) {
+		return false;
+	}
 
 	bool started_video = false;
 	if (!obs_canvas_has_video(canvas)) {
@@ -7350,7 +7359,10 @@ void CanvasDock::LoadScenes()
 		scenesDock->sceneList->clear();
 	}
 
-	StartVideo();
+	// Create the canvas without a video mix. A mix is only needed when an
+	// output (stream/record/backtrack/vcam) starts; those paths call
+	// StartVideo() themselves. This avoids a 30 fps render path at idle.
+	EnsureCanvas();
 
 	obs_canvas_enum_scenes(
 		canvas,

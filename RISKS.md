@@ -14,3 +14,5 @@ Risk register. Newest first; resolved rows are retained with links to evidence.
 | R08 | GitHub issues inherited as disabled from upstream | Cannot track work | Enabled explicitly on fork via GitHub API | resolved 2026-11-25 |
 | R09 | Local folder typo `Wormhole-verticla` | Confusing paths | Renamed to `Wormhole-vertical`; OpenCode session moved | resolved 2026-11-25 |
 | R10 | Upstream repo could change under us | Merge conflicts | `upstream` remote kept; pin baseline commit; pull deliberately, never force-push | open |
+| R11 | First Linux CI job could not find LibObs | Linux build red | PR #25 switched to the upstream composite build action; rerun showed Linux success | resolved 2026-11-25 |
+| R12 | OBS-only idle CPU is ~0.62% on the test machine | Absolute 0.5% ceiling is below the empty-OBS floor | Report as a documented gap in `FINDINGS.md`; keep 1% as the achievable ceiling and 0.5% as stretch | open |
