@@ -45,7 +45,7 @@ extern "C" {
 
 OBS_DECLARE_MODULE()
 OBS_MODULE_AUTHOR("Aitum");
-OBS_MODULE_USE_DEFAULT_LOCALE("vertical-canvas", "en-US")
+OBS_MODULE_USE_DEFAULT_LOCALE("wormhole-vertical", "en-US")
 
 #define HANDLE_RADIUS 4.0f
 #define HANDLE_SEL_RADIUS (HANDLE_RADIUS * 1.5f)
@@ -53,7 +53,7 @@ OBS_MODULE_USE_DEFAULT_LOCALE("vertical-canvas", "en-US")
 
 #define SPACER_LABEL_MARGIN 6.0f
 
-#define CANVAS_NAME "Aitum Vertical"
+#define CANVAS_NAME "Wormhole Vertical"
 
 inline std::list<CanvasDock *> canvas_docks;
 
@@ -649,29 +649,41 @@ bool obs_module_load(void)
 	obs_register_source(&audio_wrapper_source);
 	obs_register_source(&multi_canvas_source);
 
-	auto ph = obs_get_proc_handler();
-	proc_handler_add(ph, "void aitum_vertical_get_video(in int width, in int height, out ptr video)", get_video, nullptr);
-	proc_handler_add(ph, "void aitum_vertical_get_stream_settings(in int width, in int height, out ptr outputs)",
-			 get_stream_settings, nullptr);
-	proc_handler_add(ph, "void aitum_vertical_set_stream_settings(in int width, in int height, in ptr outputs)",
-			 set_stream_settings, nullptr);
-	proc_handler_add(ph, "void aitum_vertical_get_stream_output(in int width, in int height, in string name, out ptr output)",
-			 get_stream_output, nullptr);
-	proc_handler_add(ph, "void aitum_vertical_start_stream_output(in int width, in int height, in string name)",
-			 start_stream_output, nullptr);
-	proc_handler_add(ph, "void aitum_vertical_stop_stream_output(in int width, in int height, in string name)",
-			 stop_stream_output, nullptr);
-	proc_handler_add(ph, "void aitum_vertical_add_chapter(in int width, in int height, in string chapter_name)", add_chapter,
-			 nullptr);
-	proc_handler_add(ph, "void aitum_vertical_get_scene(in int width, in int height, out string scene)", get_scene, nullptr);
-	proc_handler_add(ph, "void aitum_vertical_switch_scene(in int width, in int height, in string scene)", switch_scene,
-			 nullptr);
-
 	return true;
 }
 
 void obs_module_post_load(void)
 {
+	// Side-by-side support: always expose a namespaced API. Register the legacy
+	// Aitum API for aitum-multistream compatibility only when upstream is not
+	// present. This runs in post_load so module discovery is complete and the
+	// check is independent of DLL load order.
+	auto ph = obs_get_proc_handler();
+	struct ProcDef {
+		const char *suffix;
+		proc_handler_proc_t proc;
+	};
+	const ProcDef defs[] = {
+		{"get_video(in int width, in int height, out ptr video)", get_video},
+		{"get_stream_settings(in int width, in int height, out ptr outputs)", get_stream_settings},
+		{"set_stream_settings(in int width, in int height, in ptr outputs)", set_stream_settings},
+		{"get_stream_output(in int width, in int height, in string name, out ptr output)", get_stream_output},
+		{"start_stream_output(in int width, in int height, in string name)", start_stream_output},
+		{"stop_stream_output(in int width, in int height, in string name)", stop_stream_output},
+		{"add_chapter(in int width, in int height, in string chapter_name)", add_chapter},
+		{"get_scene(in int width, in int height, out string scene)", get_scene},
+		{"switch_scene(in int width, in int height, in string scene)", switch_scene},
+	};
+	const bool upstream_loaded = obs_get_module("vertical-canvas") != nullptr;
+	for (const char *prefix : {"wormhole_vertical_", "aitum_vertical_"}) {
+		if (upstream_loaded && strcmp(prefix, "aitum_vertical_") == 0)
+			continue;
+		for (const auto &def : defs) {
+			std::string decl = std::string("void ") + prefix + def.suffix;
+			proc_handler_add(ph, decl.c_str(), def.proc, nullptr);
+		}
+	}
+
 	const auto path = obs_module_config_path("config.json");
 	obs_data_t *config = obs_data_create_from_json_file_safe(path, "bak");
 	bfree(path);
@@ -693,7 +705,7 @@ void obs_module_post_load(void)
 	if (!count) {
 		const auto canvasDock = new CanvasDock(nullptr, main_window);
 		const QString title = QString::fromUtf8(obs_module_text("Vertical"));
-		const auto name = "VerticalCanvasDock";
+		const auto name = "WormholeVerticalDock";
 		obs_frontend_add_dock_by_id(name, title.toUtf8().constData(), canvasDock);
 		canvas_docks.push_back(canvasDock);
 		blog(LOG_INFO, "[Vertical Canvas] New Canvas created");
@@ -702,7 +714,7 @@ void obs_module_post_load(void)
 			const auto item = obs_data_array_item(canvas, i);
 			const auto canvasDock = new CanvasDock(item, main_window);
 			const QString title = QString::fromUtf8(obs_module_text("Vertical"));
-			const auto name = "VerticalCanvasDock";
+			const auto name = "WormholeVerticalDock";
 			obs_frontend_add_dock_by_id(name, title.toUtf8().constData(), canvasDock);
 			obs_data_release(item);
 			canvas_docks.push_back(canvasDock);
@@ -720,7 +732,7 @@ void obs_module_post_load(void)
 	version_update_info = update_info_create_single("[Vertical Canvas]", "OBS", url.c_str(), version_info_downloaded, nullptr);
 
 	if (!vendor) {
-		vendor = obs_websocket_register_vendor("aitum-vertical-canvas");
+		vendor = obs_websocket_register_vendor("wormhole-vertical");
 	}
 	if (!vendor) {
 		return;
@@ -1065,7 +1077,7 @@ CanvasDock::CanvasDock(obs_data_t *settings, QWidget *parent)
 		ss.stream_server = obs_data_get_string(settings, "stream_server");
 		ss.stream_key = obs_data_get_string(settings, "stream_key");
 		bool whip = strstr(ss.stream_server.c_str(), "whip") != nullptr;
-		ss.service = obs_service_create(whip ? "whip_custom" : "rtmp_custom", "vertical_canvas_stream_service_0", nullptr,
+		ss.service = obs_service_create(whip ? "whip_custom" : "rtmp_custom", "wormhole_vertical_stream_service_0", nullptr,
 						nullptr);
 		streamOutputs.push_back(ss);
 	}
@@ -1169,15 +1181,15 @@ CanvasDock::CanvasDock(obs_data_t *settings, QWidget *parent)
 	scenesDock = new CanvasScenesDock(this, parent);
 	scenesDock->SetGridMode(obs_data_get_bool(settings, "grid_mode"));
 
-	const auto scenesName = "VerticalCanvasDockScenes";
+	const auto scenesName = "WormholeVerticalDockScenes";
 	const auto scenesTitle = title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.Scenes"));
 	obs_frontend_add_dock_by_id(scenesName, scenesTitle.toUtf8().constData(), scenesDock);
 	sourcesDock = new CanvasSourcesDock(this, parent);
-	const auto sourcesName = "VerticalCanvasDockSources";
+	const auto sourcesName = "WormholeVerticalDockSources";
 	const auto sourcesTitle = title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.Sources"));
 	obs_frontend_add_dock_by_id(sourcesName, sourcesTitle.toUtf8().constData(), sourcesDock);
 	transitionsDock = new CanvasTransitionsDock(this, parent);
-	const auto transitionsName = "VerticalCanvasDockTransitions";
+	const auto transitionsName = "WormholeVerticalDockTransitions";
 	const auto transitionsTitle = title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.SceneTransitions"));
 	obs_frontend_add_dock_by_id(transitionsName, transitionsTitle.toUtf8().constData(), transitionsDock);
 	preview->setObjectName(QStringLiteral("preview"));
@@ -1346,9 +1358,9 @@ CanvasDock::CanvasDock(obs_data_t *settings, QWidget *parent)
 	});
 
 	backtrack_hotkey = obs_hotkey_pair_register_frontend(
-		"VerticalCanvasDockStartBacktrack",
+		"WormholeVerticalDockStartBacktrack",
 		(title + " " + QString::fromUtf8(obs_module_text("BacktrackOn"))).toUtf8().constData(),
-		"VerticalCanvasDockStopBacktrack",
+		"WormholeVerticalDockStopBacktrack",
 		(title + " " + QString::fromUtf8(obs_module_text("BacktrackOff"))).toUtf8().constData(),
 		[](void *param, obs_hotkey_pair_id, obs_hotkey_t *, bool pressed) {
 			auto cd = (CanvasDock *)param;
@@ -1519,9 +1531,9 @@ CanvasDock::CanvasDock(obs_data_t *settings, QWidget *parent)
 	signal_handler_connect(sh, "source_save", source_save, this);
 
 	virtual_cam_hotkey = obs_hotkey_pair_register_frontend(
-		"VerticalCanvasDockStartVirtualCam",
+		"WormholeVerticalDockStartVirtualCam",
 		(title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.StartVirtualCam"))).toUtf8().constData(),
-		"VerticalCanvasDockStopVirtualCam",
+		"WormholeVerticalDockStopVirtualCam",
 		(title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.StopVirtualCam"))).toUtf8().constData(),
 		start_virtual_cam_hotkey, stop_virtual_cam_hotkey, this, this);
 
@@ -1532,9 +1544,9 @@ CanvasDock::CanvasDock(obs_data_t *settings, QWidget *parent)
 	obs_data_array_release(stop_hotkey);
 
 	record_hotkey = obs_hotkey_pair_register_frontend(
-		"VerticalCanvasDockStartRecording",
+		"WormholeVerticalDockStartRecording",
 		(title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.StartRecording"))).toUtf8().constData(),
-		"VerticalCanvasDockStopRecording",
+		"WormholeVerticalDockStopRecording",
 		(title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.StopRecording"))).toUtf8().constData(),
 		start_recording_hotkey, stop_recording_hotkey, this, this);
 
@@ -1545,9 +1557,9 @@ CanvasDock::CanvasDock(obs_data_t *settings, QWidget *parent)
 	obs_data_array_release(stop_hotkey);
 
 	stream_hotkey = obs_hotkey_pair_register_frontend(
-		"VerticalCanvasDockStartStreaming",
+		"WormholeVerticalDockStartStreaming",
 		(title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.StartStreaming"))).toUtf8().constData(),
-		"VerticalCanvasDockStopStreaming",
+		"WormholeVerticalDockStopStreaming",
 		(title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.StopStreaming"))).toUtf8().constData(),
 		start_streaming_hotkey, stop_streaming_hotkey, this, this);
 
@@ -1558,9 +1570,9 @@ CanvasDock::CanvasDock(obs_data_t *settings, QWidget *parent)
 	obs_data_array_release(stop_hotkey);
 
 	pause_hotkey = obs_hotkey_pair_register_frontend(
-		"VerticalCanvasDockPause",
+		"WormholeVerticalDockPause",
 		(title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.PauseRecording"))).toUtf8().constData(),
-		"VerticalCanvasDockUnpause",
+		"WormholeVerticalDockUnpause",
 		(title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.UnpauseRecording")))
 			.toUtf8()
 			.constData(),
@@ -1573,11 +1585,11 @@ CanvasDock::CanvasDock(obs_data_t *settings, QWidget *parent)
 	obs_data_array_release(stop_hotkey);
 
 	preview_hotkey = obs_hotkey_pair_register_frontend(
-		"VerticalCanvasDockShowPreview",
+		"WormholeVerticalDockShowPreview",
 		(title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.PreviewConextMenu.Enable")))
 			.toUtf8()
 			.constData(),
-		"VerticalCanvasDockHidePreview",
+		"WormholeVerticalDockHidePreview",
 		(title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.Preview.Disable"))).toUtf8().constData(),
 		show_preview_hotkey, hide_preview_hotkey, this, this);
 
@@ -1588,7 +1600,7 @@ CanvasDock::CanvasDock(obs_data_t *settings, QWidget *parent)
 	obs_data_array_release(stop_hotkey);
 
 	chapter_hotkey = obs_hotkey_register_frontend(
-		"VerticalCanvasDockChapter",
+		"WormholeVerticalDockChapter",
 		(title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.AddChapterMarker")))
 			.toUtf8()
 			.constData(),
@@ -1599,7 +1611,7 @@ CanvasDock::CanvasDock(obs_data_t *settings, QWidget *parent)
 	obs_data_array_release(start_hotkey);
 
 	split_hotkey = obs_hotkey_register_frontend(
-		"VerticalCanvasDockSplit",
+		"WormholeVerticalDockSplit",
 		(title + " " + QString::fromUtf8(obs_frontend_get_locale_string("Basic.Main.SplitFile"))).toUtf8().constData(),
 		recording_split_hotkey, this);
 
@@ -1608,7 +1620,7 @@ CanvasDock::CanvasDock(obs_data_t *settings, QWidget *parent)
 	obs_data_array_release(start_hotkey);
 
 	save_backtrack_hotkey = obs_hotkey_register_frontend(
-		"VerticalCanvasDockSaveBacktrack",
+		"WormholeVerticalDockSaveBacktrack",
 		(title + " " + QString::fromUtf8(obs_module_text("BacktrackSave"))).toUtf8().constData(),
 		[](void *param, obs_hotkey_id id, obs_hotkey_t *hotkey, bool pressed) {
 			UNUSED_PARAMETER(id);
@@ -1631,7 +1643,7 @@ CanvasDock::CanvasDock(obs_data_t *settings, QWidget *parent)
 	hide();
 
 	transitionAudioWrapper =
-		obs_source_create_private("vertical_audio_wrapper_source", "vertical_audio_wrapper_source", nullptr);
+		obs_source_create_private("wormhole_vertical_audio_wrapper_source", "wormhole_vertical_audio_wrapper_source", nullptr);
 	obs_source_set_muted(transitionAudioWrapper, true);
 	auto aw = (struct audio_wrapper_info *)obs_obj_get_data(transitionAudioWrapper);
 	if (aw) {
@@ -2392,7 +2404,7 @@ static obs_source_t *CreateLabel(float pixelRatio, int i)
 
 	struct dstr name;
 	dstr_init(&name);
-	dstr_printf(&name, "Aitum Vertical Preview spacing label %d", i);
+	dstr_printf(&name, "Wormhole Vertical Preview spacing label %d", i);
 	OBSSource txtSource = obs_source_create_private(text_source_id, name.array, settings);
 	dstr_free(&name);
 	return txtSource;
@@ -5391,7 +5403,7 @@ void CanvasDock::StartVirtualCam()
 		started_canvas = multiCanvas;
 		if (!multiCanvasSource) {
 			multiCanvasSource =
-				obs_source_create_private("vertical_multi_canvas_source", "vertical_multi_canvas_source", nullptr);
+				obs_source_create_private("wormhole_vertical_multi_canvas_source", "wormhole_vertical_multi_canvas_source", nullptr);
 			void *view_data = obs_obj_get_data(multiCanvasSource);
 			multi_canvas_source_add_canvas(view_data, canvas, canvas_width, canvas_height);
 		}
@@ -5645,7 +5657,7 @@ void CanvasDock::StartRecord()
 			auto old_enc = obs_output_get_video_encoder(recordOutput);
 			obs_output_release(recordOutput);
 			obs_encoder_release(old_enc);
-			recordOutput = obs_output_create(output_id, "vertical_canvas_record", nullptr, nullptr);
+			recordOutput = obs_output_create(output_id, "wormhole_vertical_record", nullptr, nullptr);
 		}
 	} else {
 		obs_output_t *output = obs_frontend_get_recording_output();
@@ -5667,7 +5679,7 @@ void CanvasDock::StartRecord()
 			}
 			obs_output_release(recordOutput);
 			obs_encoder_release(old_enc);
-			recordOutput = obs_output_create(obs_output_get_id(output), "vertical_canvas_record", nullptr, nullptr);
+			recordOutput = obs_output_create(obs_output_get_id(output), "wormhole_vertical_record", nullptr, nullptr);
 		}
 
 		obs_data_t *settings = obs_output_get_settings(output);
@@ -6342,7 +6354,7 @@ obs_encoder_t *CanvasDock::GetStreamVideoEncoder()
 		}
 	}
 	if (!video_encoder) {
-		video_encoder = obs_video_encoder_create(enc_id, "vertical_canvas_video_encoder", nullptr, nullptr);
+		video_encoder = obs_video_encoder_create(enc_id, "wormhole_vertical_video_encoder", nullptr, nullptr);
 	}
 
 	obs_encoder_update(video_encoder, video_settings);
@@ -6405,7 +6417,7 @@ obs_encoder_t *CanvasDock::GetRecordVideoEncoder()
 		}
 	}
 	if (!video_encoder) {
-		video_encoder = obs_video_encoder_create(enc_id, "vertical_canvas_record_video_encoder", nullptr, nullptr);
+		video_encoder = obs_video_encoder_create(enc_id, "wormhole_vertical_record_video_encoder", nullptr, nullptr);
 	}
 
 	obs_encoder_update(video_encoder, settings);
@@ -6548,7 +6560,7 @@ void CanvasDock::StartStreamOutput(std::vector<StreamServer>::iterator it)
 				obs_data_apply(s, ves);
 				obs_data_release(ves);
 			}
-			std::string video_encoder_name = "vertical_canvas_video_encoder_";
+			std::string video_encoder_name = "wormhole_vertical_video_encoder_";
 			video_encoder_name += it->name;
 			auto venc = obs_video_encoder_create(venc_name, video_encoder_name.c_str(), s, nullptr);
 			obs_data_release(s);
@@ -6615,7 +6627,7 @@ void CanvasDock::StartStreamOutput(std::vector<StreamServer>::iterator it)
 				obs_data_apply(s, aes);
 				obs_data_release(aes);
 			}
-			std::string audio_encoder_name = "vertical_canvas_audio_encoder_";
+			std::string audio_encoder_name = "wormhole_vertical_audio_encoder_";
 			audio_encoder_name += it->name;
 			auto aenc = obs_audio_encoder_create(aenc_name, audio_encoder_name.c_str(), s,
 							     obs_data_get_int(it->settings, "audio_track"), nullptr);
@@ -6714,7 +6726,7 @@ void CanvasDock::CreateStreamOutput(std::vector<StreamServer>::iterator it)
 			obs_encoder_release(old_enc);
 			obs_encoder_release(old_audio_enc);
 		}
-		std::string name = "vertical_canvas_stream";
+		std::string name = "wormhole_vertical_stream";
 		if (!it->name.empty()) {
 			name += "_";
 			name += it->name;
@@ -6819,7 +6831,7 @@ obs_encoder_t *CanvasDock::GetStreamAudioEncoder()
 	}
 	if (!audio_encoder) {
 		audio_encoder =
-			obs_audio_encoder_create("ffmpeg_aac", "vertical_canvas_audio_encoder", audio_settings, mix_idx, nullptr);
+			obs_audio_encoder_create("ffmpeg_aac", "wormhole_vertical_audio_encoder", audio_settings, mix_idx, nullptr);
 		obs_encoder_set_audio(audio_encoder, obs_get_audio());
 		for (auto it = streamOutputs.begin(); it != streamOutputs.end(); ++it) {
 			obs_output_set_audio_encoder(it->output, obs_encoder_get_ref(audio_encoder), 0);
@@ -6897,7 +6909,7 @@ void CanvasDock::StartStream()
 					obs_data_apply(ves_apply, ves);
 					obs_data_release(ves);
 				}
-				std::string video_encoder_name = "vertical_canvas_video_encoder_";
+				std::string video_encoder_name = "wormhole_vertical_video_encoder_";
 				video_encoder_name += it->name;
 				auto venc = obs_video_encoder_create(venc_name, video_encoder_name.c_str(), ves_apply, nullptr);
 				obs_data_release(ves_apply);
@@ -6964,7 +6976,7 @@ void CanvasDock::StartStream()
 					obs_data_apply(aes_apply, aes);
 					obs_data_release(aes);
 				}
-				std::string audio_encoder_name = "vertical_canvas_audio_encoder_";
+				std::string audio_encoder_name = "wormhole_vertical_audio_encoder_";
 				audio_encoder_name += it->name;
 				auto aenc = obs_audio_encoder_create(aenc_name, audio_encoder_name.c_str(), aes_apply,
 								     obs_data_get_int(it->settings, "audio_track"), nullptr);
@@ -9041,7 +9053,7 @@ bool CanvasDock::LoadStreamOutputs(obs_data_array_t *outputs)
 		if (ss.enabled) {
 			enabled_count++;
 		}
-		std::string service_name = "vertical_canvas_stream_service_";
+		std::string service_name = "wormhole_vertical_stream_service_";
 		service_name += std::to_string(i);
 		bool whip = strstr(ss.stream_server.c_str(), "whip") != nullptr;
 		ss.service = obs_service_create(whip ? "whip_custom" : "rtmp_custom", service_name.c_str(), nullptr, nullptr);
@@ -9173,7 +9185,7 @@ void CanvasDock::save_load(obs_data_t *save_data, bool saving, void *param)
 void CanvasDock::LogScenes()
 {
 	blog(LOG_INFO, "------------------------------------------------");
-	blog(LOG_INFO, "[Aitum Vertical] Canvas '%s' scenes:", obs_canvas_get_name(canvas));
+	blog(LOG_INFO, "[Wormhole Vertical] Canvas '%s' scenes:", obs_canvas_get_name(canvas));
 	if (scenesDock && scenesDock->sceneList) {
 		for (int j = 0; j < scenesDock->sceneList->count(); j++) {
 			auto item = scenesDock->sceneList->item(j);

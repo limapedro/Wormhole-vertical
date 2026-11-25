@@ -33,16 +33,16 @@
     },
     "platformConfig": {
         "macos": {
-            "bundleId": "tv.aitum.vertical"
+            "bundleId": "dev.limapedro.wormhole-vertical"
         }
     },
-    "name": "vertical-canvas",
-    "displayName": "Vertical",
+    "name": "wormhole-vertical",
+    "displayName": "Wormhole Vertical",
     "version": "1.6.8",
-    "author": "Aitum",
-    "website": "https://aitum.tv",
-    "email": "support@aitum.tv",
+    "author": "Wormhole-vertical contributors",
+    "website": "https://github.com/limapedro/Wormhole-vertical",
+    "email": "",
     "uuids": {
-        "windowsApp": "9072EA15-785B-4BD9-8310-68CEECDA2117"
+        "windowsApp": "C6A1D1E8-3F5B-4D2A-9C7E-5B81D0F4A2E6"
     }
 }

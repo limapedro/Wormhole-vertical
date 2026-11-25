@@ -48,6 +48,11 @@ silently change course. Newest entries first.
   `vertical-canvas.cpp:1172-1182` (dock IDs), `vertical-canvas.cpp:723`
   (WebSocket vendor). Issue
   [#2](https://github.com/limapedro/Wormhole-vertical/issues/2).
+  Implemented and verified 2026-11-25: `scripts/verify_side_by_side.ps1`
+  reports `loaded=2 collisions=0 wormhole_canvas=True aitum_canvas=True
+  errors=0`. Legacy `aitum_vertical_*` proc handlers are registered by the
+  fork only when upstream is absent; detection moved to `post_load` so DLL
+  load order cannot cause duplicate registrations.
 - **Consequences:** implemented after the `baseline-upstream` tag so the
   baseline remains byte-identical to upstream. Scene collections made with
   upstream will show missing sources when opened by the fork; migration is a

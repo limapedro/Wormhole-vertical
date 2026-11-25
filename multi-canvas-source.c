@@ -15,7 +15,7 @@ struct multi_canvas_info {
 const char *multi_canvas_get_name(void *type_data)
 {
 	UNUSED_PARAMETER(type_data);
-	return "vertical_multi_canvas";
+	return "wormhole_vertical_multi_canvas";
 }
 
 void *multi_canvas_create(obs_data_t *settings, obs_source_t *source)
@@ -186,7 +186,7 @@ void multi_canvas_source_remove_canvas(void *data, obs_canvas_t *canvas)
 }
 
 struct obs_source_info multi_canvas_source = {
-	.id = "vertical_multi_canvas_source",
+	.id = "wormhole_vertical_multi_canvas_source",
 	.type = OBS_SOURCE_TYPE_INPUT,
 	.output_flags = OBS_SOURCE_VIDEO | OBS_SOURCE_CAP_DISABLED | OBS_SOURCE_CUSTOM_DRAW,
 	.get_name = multi_canvas_get_name,
