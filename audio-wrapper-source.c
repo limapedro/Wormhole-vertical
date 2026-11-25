@@ -88,7 +88,7 @@ void audio_wrapper_enum_all_sources(void *data, obs_source_enum_proc_t enum_call
 }
 
 struct obs_source_info audio_wrapper_source = {
-	.id = "vertical_audio_wrapper_source",
+	.id = "wormhole_vertical_audio_wrapper_source",
 	.type = OBS_SOURCE_TYPE_SCENE,
 	.output_flags = OBS_SOURCE_COMPOSITE | OBS_SOURCE_CAP_DISABLED,
 	.get_name = audio_wrapper_get_name,

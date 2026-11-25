@@ -1,0 +1,17 @@
+# OBS-MCP configuration for the Wormhole-vertical benchmark instance.
+# OBS-MCP is an external MIT-licensed C server at E:/__PROJECTS__/OBS-MCP.
+
+[sender]
+name = "wormhole"
+obs_exe = "E:/__PROJECTS__/Wormhole-vertical/obs-portable/bin/64bit/obs64.exe"
+working_dir = "E:/__PROJECTS__/Wormhole-vertical/obs-portable/bin/64bit"
+profile = "Wormhole"
+collection = "WormholeSender"
+ws_host = "127.0.0.1"
+ws_port = 4455
+log_dir = "E:/__PROJECTS__/Wormhole-vertical/obs-portable/config/obs-studio/logs"
+
+[harness]
+exe = "E:/__PROJECTS__/Wormhole-vertical/build_x64/RelWithDebInfo/wormhole-vertical.dll"
+config = "E:/__PROJECTS__/Wormhole-vertical/harness/config/obs-mcp.toml"
+capture_config = "E:/__PROJECTS__/Wormhole-vertical/harness/config/obs-mcp.toml"

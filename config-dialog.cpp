@@ -229,7 +229,7 @@ OBSBasicSettings::OBSBasicSettings(CanvasDock *canvas_dock, QMainWindow *parent)
 	backtrackLayout->addRow(QString::fromUtf8(obs_module_text("BacktrackPath")), backtrackPathLayout);
 
 	OBSHotkeyWidget *otherHotkey = nullptr;
-	auto hotkey = GetHotkeyByName("VerticalCanvasDockStartBacktrack");
+	auto hotkey = GetHotkeyByName("WormholeVerticalDockStartBacktrack");
 	if (hotkey) {
 		auto id = obs_hotkey_get_id(hotkey);
 		std::vector<obs_key_combination_t> combos = GetCombosForHotkey(id);
@@ -243,7 +243,7 @@ OBSBasicSettings::OBSBasicSettings(CanvasDock *canvas_dock, QMainWindow *parent)
 		hotkeys.push_back(hw);
 	}
 
-	hotkey = GetHotkeyByName("VerticalCanvasDockStopBacktrack");
+	hotkey = GetHotkeyByName("WormholeVerticalDockStopBacktrack");
 	if (hotkey) {
 		auto id = obs_hotkey_get_id(hotkey);
 		std::vector<obs_key_combination_t> combos = GetCombosForHotkey(id);
@@ -260,7 +260,7 @@ OBSBasicSettings::OBSBasicSettings(CanvasDock *canvas_dock, QMainWindow *parent)
 		}
 	}
 
-	hotkey = GetHotkeyByName("VerticalCanvasDockSaveBacktrack");
+	hotkey = GetHotkeyByName("WormholeVerticalDockSaveBacktrack");
 	if (hotkey) {
 		auto id = obs_hotkey_get_id(hotkey);
 		std::vector<obs_key_combination_t> combos = GetCombosForHotkey(id);
@@ -365,7 +365,7 @@ OBSBasicSettings::OBSBasicSettings(CanvasDock *canvas_dock, QMainWindow *parent)
 	streamingLayout->addWidget(streamingMatchMain);
 
 	otherHotkey = nullptr;
-	hotkey = GetHotkeyByName("VerticalCanvasDockStartStreaming");
+	hotkey = GetHotkeyByName("WormholeVerticalDockStartStreaming");
 	if (hotkey) {
 		auto id = obs_hotkey_get_id(hotkey);
 		std::vector<obs_key_combination_t> combos = GetCombosForHotkey(id);
@@ -379,7 +379,7 @@ OBSBasicSettings::OBSBasicSettings(CanvasDock *canvas_dock, QMainWindow *parent)
 		hotkeys.push_back(hw);
 	}
 
-	hotkey = GetHotkeyByName("VerticalCanvasDockStopStreaming");
+	hotkey = GetHotkeyByName("WormholeVerticalDockStopStreaming");
 	if (hotkey) {
 		auto id = obs_hotkey_get_id(hotkey);
 		std::vector<obs_key_combination_t> combos = GetCombosForHotkey(id);
@@ -645,7 +645,7 @@ OBSBasicSettings::OBSBasicSettings(CanvasDock *canvas_dock, QMainWindow *parent)
 
 	otherHotkey = nullptr;
 
-	hotkey = GetHotkeyByName("VerticalCanvasDockStartRecording");
+	hotkey = GetHotkeyByName("WormholeVerticalDockStartRecording");
 	if (hotkey) {
 		auto id = obs_hotkey_get_id(hotkey);
 		std::vector<obs_key_combination_t> combos = GetCombosForHotkey(id);
@@ -659,7 +659,7 @@ OBSBasicSettings::OBSBasicSettings(CanvasDock *canvas_dock, QMainWindow *parent)
 		hotkeys.push_back(hw);
 	}
 
-	hotkey = GetHotkeyByName("VerticalCanvasDockStopRecording");
+	hotkey = GetHotkeyByName("WormholeVerticalDockStopRecording");
 	if (hotkey) {
 		auto id = obs_hotkey_get_id(hotkey);
 		std::vector<obs_key_combination_t> combos = GetCombosForHotkey(id);
@@ -679,7 +679,7 @@ OBSBasicSettings::OBSBasicSettings(CanvasDock *canvas_dock, QMainWindow *parent)
 
 	otherHotkey = nullptr;
 
-	hotkey = GetHotkeyByName("VerticalCanvasDockPause");
+	hotkey = GetHotkeyByName("WormholeVerticalDockPause");
 	if (hotkey) {
 		auto id = obs_hotkey_get_id(hotkey);
 		std::vector<obs_key_combination_t> combos = GetCombosForHotkey(id);
@@ -693,7 +693,7 @@ OBSBasicSettings::OBSBasicSettings(CanvasDock *canvas_dock, QMainWindow *parent)
 		hotkeys.push_back(hw);
 	}
 
-	hotkey = GetHotkeyByName("VerticalCanvasDockUnpause");
+	hotkey = GetHotkeyByName("WormholeVerticalDockUnpause");
 	if (hotkey) {
 		auto id = obs_hotkey_get_id(hotkey);
 		std::vector<obs_key_combination_t> combos = GetCombosForHotkey(id);
@@ -711,7 +711,7 @@ OBSBasicSettings::OBSBasicSettings(CanvasDock *canvas_dock, QMainWindow *parent)
 		}
 	}
 
-	hotkey = GetHotkeyByName("VerticalCanvasDockChapter");
+	hotkey = GetHotkeyByName("WormholeVerticalDockChapter");
 	if (hotkey) {
 		auto id = obs_hotkey_get_id(hotkey);
 		std::vector<obs_key_combination_t> combos = GetCombosForHotkey(id);
@@ -725,7 +725,7 @@ OBSBasicSettings::OBSBasicSettings(CanvasDock *canvas_dock, QMainWindow *parent)
 		hotkeys.push_back(hw);
 	}
 
-	hotkey = GetHotkeyByName("VerticalCanvasDockSplit");
+	hotkey = GetHotkeyByName("WormholeVerticalDockSplit");
 	if (hotkey) {
 		auto id = obs_hotkey_get_id(hotkey);
 		std::vector<obs_key_combination_t> combos = GetCombosForHotkey(id);
@@ -1349,7 +1349,7 @@ void OBSBasicSettings::SaveSettings()
 				StreamServer so;
 				so.stream_server = ss;
 				so.stream_key = sk;
-				std::string service_name = "vertical_canvas_stream_service_";
+				std::string service_name = "wormhole_vertical_stream_service_";
 				service_name += std::to_string(idx);
 				bool whip = strstr(so.stream_server.c_str(), "whip") != nullptr;
 				so.service = obs_service_create(whip ? "whip_custom" : "rtmp_custom", service_name.c_str(), nullptr,
