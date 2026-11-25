@@ -1,0 +1,16 @@
+{
+    "display_name": "Wormhole Vertical",
+    "id": "a532a044-39bd-438f-885a-960bfdfc5475",
+    "version": "1.6.8",
+    "authors": ["Aitum", "Exeldro", "Wormhole-vertical contributors"],
+    "name": "wormhole-vertical",
+    "description": "A lightweight vertical canvas plugin for OBS, forked from Aitum Vertical.",
+    "long_description": "Fork of Aitum Vertical Canvas, optimised for low CPU and GPU use. Original by Aitum.",
+    "urls": {
+        "repository": "https://github.com/limapedro/Wormhole-vertical",
+        "website": "https://github.com/limapedro/Wormhole-vertical",
+        "support": "https://github.com/limapedro/Wormhole-vertical/issues"
+    },
+    "has_banner": false,
+    "has_icon": false
+}
