@@ -31,3 +31,8 @@ benchmarks/raw/
 exp_*/*.csv
 exp_*/*.json
 exp_*/*.log
+
+# Committed baseline binaries are not allowed: regenerate via scripts/stage.
+benchmarks/plugins/
+__pycache__/
+*.pyc
