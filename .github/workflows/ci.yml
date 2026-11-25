@@ -34,16 +34,12 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake ninja-build pkg-config curl zsh \
-            qt6-base-dev qt6-base-private-dev libcurl4-openssl-dev \
-            libjansson-dev libx11-dev libxcb-xinerama0-dev
-      - name: Configure
-        run: cmake --preset ubuntu-ci-x86_64
-      - name: Build
-        run: cmake --build --preset ubuntu-ci-x86_64
+      - # Upstream's composite action installs OBS dependencies and builds
+        # libobs from the pinned SDK before configuring the plugin.
+        uses: ./.github/actions/build-plugin
+        with:
+          target: x86_64
+          config: RelWithDebInfo
 
   macos-build:
     name: Build (macOS universal, best effort)
@@ -51,7 +47,7 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - name: Configure
-        run: cmake --preset macos-ci
-      - name: Build
-        run: cmake --build --preset macos-ci --config RelWithDebInfo
+      - uses: ./.github/actions/build-plugin
+        with:
+          target: macos-universal
+          config: RelWithDebInfo
