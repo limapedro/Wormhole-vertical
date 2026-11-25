@@ -67,16 +67,28 @@ installed together; they measure per-plugin contribution directly.
 - Warm-up 10 s, measurement window 60 s, 5 runs per scenario. Report median
   with min/max; outliers are recorded, never silently dropped.
 
-## Noise margin
+## Noise margin (measured in `exp_000`, 2026-11-25)
 
-**Not yet measured.** `exp_000` runs the same scenario repeatedly with no code
-change and records the coefficient of variation. Until then no delta smaller
-than that margin will be claimed.
+- OBS `GetStats.cpuUsage`: run-to-run CoV 7–13% → **acceptance margin 10%**.
+- OBS `averageFrameRenderTime`: ~4–5% excluding one-frame spikes → **5%**.
+- Working set: <0.2%; skipped frames: zero.
+- Process-level CPU from OBS-MCP: 15–18% CoV, secondary metric only.
 
-## Baseline — upstream 1.6.8
+No delta smaller than these margins is a finding. Raw data:
+`benchmarks/raw/run_20261125T130255Z.csv` (regenerate with the harness).
 
-**Not yet measured.** The baseline DLL is the unmodified `baseline-upstream`
-build. No numeric baseline is claimed here.
+## Baseline — upstream 1.6.8 (`exp_000`, partial matrix)
+
+| Scenario | OBS CPU median | Process CPU median | Render ms median | RAM | Skipped |
+|---|---|---|---|---|---|
+| S0-none | 0.6168% | 0.52% | 0.6017 | 491.7 MB | 0 |
+| S0-upstream | 0.7904% | 0.78% | 0.6845 | 495.9 MB | 0 |
+| S0-fork (unoptimized) | 0.7679% | 0.78% | 0.6958 | 496.1 MB | 0 |
+| S0-both (4 runs) | 0.7900% | — | 0.6852 | ~496 MB | 0 |
+
+The fork's 2.8% lower CPU is **below the 10% noise margin** — not a finding.
+Both plugins together cost the same as upstream alone within noise. Full
+scenario matrix (S1–S10) is still pending; these are idle scenarios only.
 
 ## Targets
 
