@@ -102,8 +102,11 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     output = out_dir / f"run_{stamp}.csv"
+    handle = output.open("w", newline="", encoding="utf-8")
+    writer = csv.DictWriter(handle, fieldnames=FIELDS)
+    writer.writeheader()
+    handle.flush()
     mcp = ObsMcp(cfg.mcp_exe, cfg.mcp_config, root)
-    rows: list[dict] = []
     try:
         for scenario in cfg.scenarios:
             for run in range(1, cfg.runs + 1):
@@ -115,7 +118,8 @@ def main() -> int:
                 dismiss_crash(cfg, root)
                 time.sleep(cfg.warmup_s)
                 for index in range(1, cfg.samples + 1):
-                    rows.append(sample(mcp, cfg, scenario.id, run, index))
+                    writer.writerow(sample(mcp, cfg, scenario.id, run, index))
+                    handle.flush()
                     if index < cfg.samples:
                         time.sleep(max(1, cfg.window_s // cfg.samples))
                 mcp.tool("obs_terminate", {"name": cfg.instance.name})
@@ -123,11 +127,8 @@ def main() -> int:
                 print(f"{scenario.id} run {run}/{cfg.runs} complete", flush=True)
     finally:
         mcp.close()
-    with output.open("w", newline="", encoding="utf-8") as fh:
-        writer = csv.DictWriter(fh, fieldnames=FIELDS)
-        writer.writeheader()
-        writer.writerows(rows)
-    print(f"wrote {len(rows)} rows to {output}")
+        handle.close()
+    print(f"wrote results to {output}")
     return 0
 
 
